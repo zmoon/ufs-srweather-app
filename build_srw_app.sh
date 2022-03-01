@@ -42,7 +42,7 @@ FCST_opt="${1:-FV3}"
 ## Clean option ("YES" or not)
 ##    YES : clean build-related directories (bin,build,include,lib,share)
 ##
-clean_opt="NO"
+clean_opt="YES"
 ##
 ## Compiler
 ##
@@ -50,8 +50,8 @@ export COMPILER="intel"
 ##
 ## Flag for building components
 ##
-clone_externals="NO"
-build_app_base="NO"
+clone_externals="YES"
+build_app_base="YES"
 build_app_add_aqm="YES"
 ##
 ###########################################################################
