@@ -42,7 +42,7 @@ FCST_opt="${1:-FV3}"
 ## Clean option ("YES" or not)
 ##    YES : clean build-related directories (bin,build,include,lib,share)
 ##
-clean_opt="YES"
+clean_opt="NO"
 ##
 ## Compiler
 ##
@@ -50,8 +50,8 @@ export COMPILER="intel"
 ##
 ## Flag for building components
 ##
-clone_externals="YES"
-build_app_base="YES"
+clone_externals="NO"
+build_app_base="NO"
 build_app_add_aqm="YES"
 ##
 ###########################################################################
@@ -130,15 +130,15 @@ if [ "${build_app_add_aqm}" = "YES" ]; then
   cd ${AQM_DIR}
   ## ARL-NEXUS
   echo "... Build ARL-NEXUS ..."
-  ./build_nexus.sh
+  ./build_nexus.sh || exit 1
 
   ## GEFS2CLBC
   echo "... Build gefs2clbc-para ..."
-  ./build_gefs2clbc.sh
+  ./build_gefs2clbc.sh || exit 2
 
   ## Replace UPP control file
   echo "... Replace UPP control file ..."
-  cp "${SRC_DIR}/AQM-utils/parm/postxconfig-NT-fv3lam_cmaq.txt" "${SRC_DIR}/UPP/parm/" && echo "UPP control file replaced."
+  cp "${SRC_DIR}/AQM-utils/parm/postxconfig-NT-fv3lam_cmaq.txt" "${SRC_DIR}/UPP/parm/" || exit 3
 fi
 
 echo "===== App installed successfully !!! ====="
