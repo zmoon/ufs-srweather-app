@@ -138,7 +138,9 @@ if [ "${build_app_add_aqm}" = "YES" ]; then
 
   ## Replace UPP control file
   echo "... Replace UPP control file ..."
-  cp "${SRC_DIR}/AQM-utils/parm/postxconfig-NT-fv3lam_cmaq.txt" "${SRC_DIR}/UPP/parm/"
+  cp "${SRC_DIR}/AQM-utils/parm/postxconfig-NT-fv3lam_cmaq.txt" "${SRC_DIR}/UPP/parm/" && echo "UPP control file replaced."
 fi
+
+echo "===== App installed successfully !!! ====="
 
 exit 0
