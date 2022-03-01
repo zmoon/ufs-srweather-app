@@ -24,10 +24,10 @@ fi
 SRW_APP_DIR="${MYDIR}"
 AQM_DIR="${SRW_APP_DIR}/AQM"
 BUILD_DIR="${SRW_APP_DIR}/build"
-EXEC_DIR="${SRW_APP_DIR}/bin"
+BIN_DIR="${SRW_APP_DIR}/bin"
 LIB_DIR="${SRW_APP_DIR}/lib"
 MOD_DIR="${SRW_APP_DIR}/env"
-SORC_DIR="${SRW_APP_DIR}/src"
+SRC_DIR="${SRW_APP_DIR}/src"
 
 ###########################################################################
 ## User specific parameters                                              ##
@@ -67,7 +67,7 @@ if [ "${clone_externals}" = "YES" ]; then
 fi
 
 if [ "${clean_opt}" = "YES" ]; then
-  rm -rf ${EXEC_DIR}
+  rm -rf ${BIN_DIR}
   rm -rf ${BUILD_DIR}
   rm -rf ${SRW_APP_DIR}/include
   rm -rf ${LIB_DIR}
@@ -136,6 +136,9 @@ if [ "${build_app_add_aqm}" = "YES" ]; then
   echo "... Build gefs2clbc-para ..."
   ./build_gefs2clbc.sh
 
+  ## Replace UPP control file
+  echo "... Replace UPP control file ..."
+  cp "${SRC_DIR}/AQM-utils/parm/postxconfig-NT-fv3lam_cmaq.txt" "${SRC_DIR}/UPP/parm/"
 fi
 
 exit 0
