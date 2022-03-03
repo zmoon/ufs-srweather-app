@@ -35,7 +35,6 @@ module load nemsio/2.5.2
 module load w3emc/2.7.3
 
 module load libpng/1.2.59
-module load post/8.0.9
 
 ## load ESMF library for above compiler / MPI combination
 module unload hdf5
