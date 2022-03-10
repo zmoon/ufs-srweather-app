@@ -70,6 +70,10 @@ fi
 echo "Clean option              :" ${clean_opt}
 echo "Compiler                  :" ${COMPILER}
 echo "Build srw app             :" ${build_app_base}
+
+if [ "${FCST_opt}" = "FV3" ]; then
+  build_app_add_aqm="NO"
+fi
 echo "Build extra comp. for AQM :" ${build_app_add_aqm}
 
 if [ "${clone_externals}" = "YES" ]; then
@@ -129,9 +133,6 @@ if [ "${build_app_base}" = "YES" ]; then
 fi
 
 ##### Build extra components for AQM #####################################
-if [ "${FCST_opt}" = "FV3" ]; then
-  build_app_add_aqm="NO"
-fi
 if [ "${build_app_add_aqm}" = "YES" ]; then
   echo "... Load environment file for extra AQM components ..."
   MOD_FILE="${MOD_DIR}/build_aqm_${PLATFORM}_${COMPILER}"
