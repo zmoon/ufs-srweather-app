@@ -38,17 +38,22 @@ SRC_DIR="${SRW_APP_DIR}/src"
 ##    AQM  : FV3 + AQM
 ##
 FCST_opt="${1:-FV3}"
+## 
+## CCPP Suites: 
+## For use of the default list (src/CMakeLists.txt): CCPP_SUITES=""
+##
+CCPP_SUITES="FV3_GFS_v15p2,FV3_GFS_v16"
+##
+## Compiler
+##
+export COMPILER="intel"
 ##
 ## Clean option ("YES" or not)
 ##    YES : clean build-related directories (bin,build,include,lib,share)
 ##
 clean_opt="YES"
 ##
-## Compiler
-##
-export COMPILER="intel"
-##
-## Flag for building components
+## Flag for building components (for debugging)
 ##
 clone_externals="YES"
 build_app_base="YES"
@@ -57,6 +62,11 @@ build_app_add_aqm="YES"
 ###########################################################################
 
 echo "Forecast model option     :" ${FCST_opt}
+if [ ! -z "${CCPP_SUITES}" ]; then
+  echo "CCPP_SUITES               :" ${CCPP_SUITES}
+else
+  echo "CCPP_SUITES               : Default"
+fi
 echo "Clean option              :" ${clean_opt}
 echo "Compiler                  :" ${COMPILER}
 echo "Build srw app             :" ${build_app_base}
@@ -92,9 +102,12 @@ fi
 
 # CMAKE settings
 CMAKE_SETTINGS="-DCMAKE_INSTALL_PREFIX=${SRW_APP_DIR}"
-#if [ "${FCST_opt}" = "AQM" ]; then
-#  CMAKE_SETTINGS="${CMAKE_SETTINGS} -DAQM=ON"
-#fi
+if [ "${FCST_opt}" = "AQM" ]; then
+  CMAKE_SETTINGS="${CMAKE_SETTINGS} -DAPP=ATMAQ"
+fi
+if [ ! -z "${CCPP_SUITES}" ]; then
+  CMAKE_SETTINGS="${CMAKE_SETTINGS} -DCCPP_SUITES=${CCPP_SUITES}"
+fi
 
 # Make build directory
 mkdir -p ${BUILD_DIR}
