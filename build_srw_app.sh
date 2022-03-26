@@ -42,7 +42,11 @@ FCST_opt="${1:-FV3}"
 ## CCPP Suites: 
 ## For use of the default list (src/CMakeLists.txt): CCPP_SUITES=""
 ##
-CCPP_SUITES="FV3_GFS_v15p2,FV3_GFS_v16"
+if [ ${FCST_opt} = "AQM" ]; then
+  CCPP_SUITES="FV3_GFS_v15p2,FV3_GFS_v16"
+else
+  CCPP_SUITES=""
+fi
 ##
 ## Compiler
 ##
