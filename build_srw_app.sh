@@ -52,16 +52,14 @@ fi
 ##
 export COMPILER="intel"
 ##
-## Clean option ("YES" or not)
+## Clean option ("YES" or else)
 ##    YES : clean build-related directories (bin,build,include,lib,share)
 ##
 clean_opt="YES"
 ##
-## Flag for building components (for debugging)
+## Clone components ("YES" or else)
 ##
 clone_externals="YES"
-build_app_base="YES"
-build_app_add_aqm="YES"
 ##
 ###########################################################################
 
@@ -71,18 +69,14 @@ if [ ! -z "${CCPP_SUITES}" ]; then
 else
   echo "CCPP_SUITES               : Default"
 fi
-echo "Clean option              :" ${clean_opt}
-echo "Compiler                  :" ${COMPILER}
-echo "Build srw app             :" ${build_app_base}
-
-if [ "${FCST_opt}" = "FV3" ]; then
-  build_app_add_aqm="NO"
-fi
-echo "Build extra comp. for AQM :" ${build_app_add_aqm}
 
 if [ "${clone_externals}" = "YES" ]; then
   clean_opt="YES"
 fi
+
+echo "Clean option              :" ${clean_opt}
+echo "Compiler                  :" ${COMPILER}
+echo "Clone external components :" ${clone_externals}
 
 if [ "${clean_opt}" = "YES" ]; then
   rm -rf ${BIN_DIR}
@@ -122,38 +116,28 @@ mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
 
 ##### Build UFS SRW App ##################################################
-if [ "${build_app_base}" = "YES" ]; then
-  echo "... Load environment file ..."
-  MOD_FILE="${MOD_DIR}/build_${PLATFORM}_${COMPILER}.env"
-  module use ${MOD_DIR}
-  . ${MOD_FILE}
-  module list
+echo "... Load environment file ..."
+MOD_FILE="${MOD_DIR}/build_${PLATFORM}_${COMPILER}.env"
+module use ${MOD_DIR}
+. ${MOD_FILE}
+module list
 
-  echo "... Generate CMAKE configuration ..."
-  cmake ${SRW_APP_DIR} ${CMAKE_SETTINGS} 2>&1 | tee log.cmake.app
-  echo "... Compile executables ..."
-  make -j8 2>&1 | tee log.make.app
-  echo "... App build completed ..."
-fi
+echo "... Generate CMAKE configuration ..."
+cmake ${SRW_APP_DIR} ${CMAKE_SETTINGS} 2>&1 | tee log.cmake.app
+echo "... Compile executables ..."
+make -j8 2>&1 | tee log.make.app
+echo "... App build completed ..."
 
 ##### Build extra components for AQM #####################################
-if [ "${build_app_add_aqm}" = "YES" ]; then
-  echo "... Load environment file for extra AQM components ..."
-  MOD_FILE="${MOD_DIR}/build_aqm_${PLATFORM}_${COMPILER}"
-  module purge
-  module use ${MOD_DIR}
-  source ${MOD_FILE}
-  module list
-
+if [ "${FCST_opt}" = "AQM" ]; then
   cd ${AQM_DIR}
-
   ## GEFS2CLBC
   echo "... Build gefs2clbc-para ..."
   ./build_gefs2clbc.sh || exit 1
 
   ## Replace UPP control file
   echo "... Replace UPP control file ..."
-  cp "${SRC_DIR}/AQM-utils/parm/postxconfig-NT-fv3lam_cmaq.txt" "${SRC_DIR}/UPP/parm/" || exit 3
+  cp "${SRC_DIR}/AQM-utils/parm/postxconfig-NT-fv3lam_cmaq.txt" "${SRC_DIR}/UPP/parm/" || exit 1
 fi
 
 echo "===== App installed successfully !!! ====="
