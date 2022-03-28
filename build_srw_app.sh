@@ -111,7 +111,7 @@ fi
 # CMAKE settings
 CMAKE_SETTINGS="-DCMAKE_INSTALL_PREFIX=${SRW_APP_DIR}"
 if [ "${FCST_opt}" = "AQM" ]; then
-  CMAKE_SETTINGS="${CMAKE_SETTINGS} -DAPP=ATMAQ"
+  CMAKE_SETTINGS="${CMAKE_SETTINGS} -DAPP=ATMAQ -DCPL_AQM=ON"
 fi
 if [ ! -z "${CCPP_SUITES}" ]; then
   CMAKE_SETTINGS="${CMAKE_SETTINGS} -DCCPP_SUITES=${CCPP_SUITES}"
@@ -146,13 +146,10 @@ if [ "${build_app_add_aqm}" = "YES" ]; then
   module list
 
   cd ${AQM_DIR}
-  ## ARL-NEXUS
-  echo "... Build ARL-NEXUS ..."
-  ./build_nexus.sh || exit 1
 
   ## GEFS2CLBC
   echo "... Build gefs2clbc-para ..."
-  ./build_gefs2clbc.sh || exit 2
+  ./build_gefs2clbc.sh || exit 1
 
   ## Replace UPP control file
   echo "... Replace UPP control file ..."
