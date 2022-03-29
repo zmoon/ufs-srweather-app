@@ -130,7 +130,19 @@ echo "... App build completed ..."
 
 ##### Build extra components for AQM #####################################
 if [ "${FCST_opt}" = "AQM" ]; then
+  echo "... Load environment file for extra AQM components ..."
+  MOD_FILE="${MOD_DIR}/build_aqm_${PLATFORM}_${COMPILER}"
+  module purge
+  module use ${MOD_DIR}
+  source ${MOD_FILE}
+  module list
+
   cd ${AQM_DIR}
+
+  ## ARL-NEXUS
+  echo "... Build ARL-NEXUS ..."
+  ./build_nexus.sh || exit 1
+
   ## GEFS2CLBC
   echo "... Build gefs2clbc-para ..."
   ./build_gefs2clbc.sh || exit 1
