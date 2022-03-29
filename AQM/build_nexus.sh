@@ -46,7 +46,7 @@ CMAKE_SETTINGS="-DCMAKE_INSTALL_PREFIX=${SRC_DIR}"
 #CMAKE_SETTINGS="${CMAKE_SETTINGS} -DEMC_EXEC_DIR=ON"
 
 cmake -DCMAKE_INSTALL_PREFIX=${SRW_APP_DIR} ${SRC_DIR} 2>&1 | tee log.cmake.nexus
-make -j4
+make -j4 2>&1 | tee log.make.nexus
 make install
 
 echo "arl_nexus has been copied to bin (exec)."
