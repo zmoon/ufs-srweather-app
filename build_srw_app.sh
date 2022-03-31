@@ -6,10 +6,12 @@
 ## Usage:                                                                ##
 ##  1. Non-coupled (FV3 stand-alone) regional modeling:                  ##
 ##             ./build_srw_app.sh                                        ##
+##        or   ./build_srw_app.sh FV3                                    ##
 ##        or   ./build_srw_app.sh "FV3"                                  ##
 ##                                                                       ##
 ##  2. Coupled regional air quality modeling (RRFS-CMAQ):                ##
-##             ./build_srw_app.sh "AQM"                                  ##
+##             ./build_srw_app.sh AQM                                    ##
+##        or   ./build_srw_app.sh "AQM"                                  ##
 ##                                                                       ##
 ###########################################################################
 
@@ -28,38 +30,68 @@ BIN_DIR="${SRW_APP_DIR}/bin"
 LIB_DIR="${SRW_APP_DIR}/lib"
 MOD_DIR="${SRW_APP_DIR}/env"
 SRC_DIR="${SRW_APP_DIR}/src"
+## Output file name to check if executables exist in BIN_DIR --------------
+BUILD_OUT_FN="build_exec_pass.out"
 
 ###########################################################################
 ## User specific parameters                                              ##
 ###########################################################################
-##
+## ------------------------------------------------------------------------
 ## Forecast model options ("FV3" or "AQM")
 ##    FV3  : FV3 stand-alone
 ##    AQM  : FV3 + AQM
-##
+## ------------------------------------------------------------------------
 FCST_opt="${1:-FV3}"
-## 
+## ------------------------------------------------------------------------
 ## CCPP Suites: 
 ## For use of the default list (src/CMakeLists.txt): CCPP_SUITES=""
-##
+## ------------------------------------------------------------------------
 if [ ${FCST_opt} = "AQM" ]; then
   CCPP_SUITES="FV3_GFS_v15p2,FV3_GFS_v16"
 else
   CCPP_SUITES=""
 fi
-##
-## Compiler
-##
+## Compiler ---------------------------------------------------------------
 export COMPILER="intel"
-##
+## ------------------------------------------------------------------------
 ## Clean option ("YES" or else)
 ##    YES : clean build-related directories (bin,build,include,lib,share)
-##
+## ------------------------------------------------------------------------
 clean_opt="YES"
-##
-## Clone components ("YES" or else)
-##
+## Clone components ("YES" or else) ---------------------------------------
 clone_externals="YES"
+##
+###########################################################################
+##
+###########################################################################
+## List of all executables                                               ##
+###########################################################################
+##
+## Basic executables of the UFS SRW App -----------------------------------
+declare -a exec_srw=( chgres_cube \
+                      emcsfc_ice_blend \
+                      emcsfc_snow2mdl \
+                      filter_topo \
+                      fregrid \
+                      fvcom_to_FV3 \
+                      global_cycle \
+                      global_equiv_resol \
+                      inland \
+                      lakefrac \
+                      make_hgrid \
+                      make_solo_mosaic \
+                      orog \
+                      orog_gsl \
+                      regional_esg_grid \
+                      sfc_climo_gen \
+                      shave \
+                      ufs_model \
+                      upp.x \
+                      vcoord_gen )
+
+## Additional executables for AQM -----------------------------------------
+declare -a exec_aqm=( nexus \
+                      gefs2lbc_para )
 ##
 ###########################################################################
 
@@ -84,12 +116,13 @@ if [ "${clean_opt}" = "YES" ]; then
   rm -rf ${SRW_APP_DIR}/include
   rm -rf ${LIB_DIR}
   rm -rf ${SRW_APP_DIR}/share
+  rm -f ${BUILD_OUT_FN}
 fi
 
-# detect PLATFORM (MACHINE)
+## detect PLATFORM (MACHINE) ----------------------------------------------
 source ${MOD_DIR}/detect_machine.sh
 
-# Check out the external components
+## Check out the external components --------------------------------------
 if [ "${clone_externals}" = "YES" ]; then
   echo "... Checking out the external components ..."
   if [ "${FCST_opt}" = "FV3" ]; then
@@ -102,7 +135,7 @@ if [ "${clone_externals}" = "YES" ]; then
   fi
 fi
 
-# CMAKE settings
+## CMAKE settings ---------------------------------------------------------
 CMAKE_SETTINGS="-DCMAKE_INSTALL_PREFIX=${SRW_APP_DIR}"
 if [ "${FCST_opt}" = "AQM" ]; then
   CMAKE_SETTINGS="${CMAKE_SETTINGS} -DAPP=ATMAQ -DCPL_AQM=ON"
@@ -111,11 +144,11 @@ if [ ! -z "${CCPP_SUITES}" ]; then
   CMAKE_SETTINGS="${CMAKE_SETTINGS} -DCCPP_SUITES=${CCPP_SUITES}"
 fi
 
-# Make build directory
+## Make build directory ---------------------------------------------------
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
 
-##### Build UFS SRW App ##################################################
+## Build UFS SRW App ------------------------------------------------------
 echo "... Load environment file ..."
 MOD_FILE="${MOD_DIR}/build_${PLATFORM}_${COMPILER}.env"
 module use ${MOD_DIR}
@@ -128,7 +161,7 @@ echo "... Compile executables ..."
 make -j8 2>&1 | tee log.make.app
 echo "... App build completed ..."
 
-##### Build extra components for AQM #####################################
+## Build extra components for AQM -----------------------------------------
 if [ "${FCST_opt}" = "AQM" ]; then
   echo "... Load environment file for extra AQM components ..."
   MOD_FILE="${MOD_DIR}/build_aqm_${PLATFORM}_${COMPILER}"
@@ -139,10 +172,6 @@ if [ "${FCST_opt}" = "AQM" ]; then
 
   cd ${AQM_DIR}
 
-  ## ARL-NEXUS
-  echo "... Build ARL-NEXUS ..."
-  ./build_nexus.sh || exit 1
-
   ## GEFS2CLBC
   echo "... Build gefs2clbc-para ..."
   ./build_gefs2clbc.sh || exit 1
@@ -152,6 +181,43 @@ if [ "${FCST_opt}" = "AQM" ]; then
   cp "${SRC_DIR}/AQM-utils/parm/postxconfig-NT-fv3lam_cmaq.txt" "${SRC_DIR}/UPP/parm/" || exit 1
 fi
 
-echo "===== App installed successfully !!! ====="
+cd ${SRW_APP_DIR}
+
+## Create output file to check if executables exist in BIN_DIR ------------
+if [ ! -f "${BUILD_OUT_FN}" ]; then
+   touch ${BUILD_OUT_FN}
+fi
+
+## Check if all executables exist in BIN_DIR ------------------------------
+n_fail=0
+echo $( date --utc ) >> ${BUILD_OUT_FN}
+for file in "${exec_srw[@]}" ; do
+  exec_file="${BIN_DIR}/${file}"
+  if [ -f ${exec_file} ]; then
+    echo "PASS:: executable = ${file}" >> ${BUILD_OUT_FN}
+  else
+    echo "FAIL:: executable = ${file}" >> ${BUILD_OUT_FN}
+    (( n_fail=n_fail+1 ))
+  fi
+done
+if [ "${FCST_opt}" = "AQM" ]; then
+  for file in "${exec_aqm[@]}" ; do
+    exec_file="${BIN_DIR}/${file}"
+    if [ -f ${exec_file} ]; then
+      echo "PASS:: executable = ${file}" >> ${BUILD_OUT_FN}
+    else
+      echo "FAIL:: executable = ${file}" >> ${BUILD_OUT_FN}
+      (( n_fail=n_fail+1 ))
+    fi
+  done
+fi
+
+if [ ${n_fail} -eq 0 ]; then
+  echo "===== App-build: COMPLETED !!! ====="
+else
+  echo "===== App-build: FAILED !!! ====="
+  echo "===== Number of failed executables:" ${n_fail}
+  echo "===== Please check:" ${BUILD_OUT_FN}
+fi
 
 exit 0
