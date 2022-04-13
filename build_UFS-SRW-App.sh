@@ -122,3 +122,8 @@ elif [[ "${RRFS_opt}" == "RRFS-CMAQ" ]]; then
     ./build_JEDI.sh
   fi
 fi
+
+# Replace the upp control file
+echo "... Replace UPP control file ..."
+cp "/scratch2/NCEPDEV/naqfc/RRFS_CMAQ/PARM/postxconfig-NT-fv3lam_cmaq.txt" "${SRW_APP_DIR}/src/UPP/parm/" || exit 1
+
