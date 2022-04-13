@@ -58,7 +58,10 @@ export COMPILER="intel"
 ##    YES : clean build-related directories (bin,build,include,lib,share)
 ## ------------------------------------------------------------------------
 clean_opt="YES"
-## Clone components ("YES" or else) ---------------------------------------
+## ------------------------------------------------------------------------
+## Clone components ("YES" or else)
+##    YES : check out external components from GitHub
+## ------------------------------------------------------------------------
 clone_externals="YES"
 ##
 ###########################################################################
