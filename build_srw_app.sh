@@ -48,16 +48,9 @@ FCST_opt="${1:-FV3}"
 ## ------------------------------------------------------------------------
 if [ ${FCST_opt} = "AQM" ]; then
   CCPP_SUITES="FV3_GFS_v15p2,FV3_GFS_v16"
-else
-  CCPP_SUITES=""
 fi
 ## Compiler ---------------------------------------------------------------
-export COMPILER="intel"
-## ------------------------------------------------------------------------
-## Clean option ("YES" or else)
-##    YES : clean build-related directories (bin,build,include,lib,share)
-## ------------------------------------------------------------------------
-clean_opt="YES"
+COMPILER="intel"
 ## ------------------------------------------------------------------------
 ## Clone components ("YES" or else)
 ##    YES : check out external components from GitHub
@@ -105,15 +98,10 @@ else
   echo "CCPP_SUITES               : Default"
 fi
 
-if [ "${clone_externals}" = "YES" ]; then
-  clean_opt="YES"
-fi
-
-echo "Clean option              :" ${clean_opt}
 echo "Compiler                  :" ${COMPILER}
 echo "Clone external components :" ${clone_externals}
 
-if [ "${clean_opt}" = "YES" ]; then
+if [ "${clone_externals}" = "YES" ]; then
   rm -rf ${BIN_DIR}
   rm -rf ${BUILD_DIR}
   rm -rf ${SRW_APP_DIR}/include
