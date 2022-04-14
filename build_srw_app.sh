@@ -23,7 +23,7 @@ OPTIONS
       show this help guide
   --app=APPLICATION
       SRW App application to build
-      (e.g. ATM for non-coupled AQM stand-alone; AQM for ATM+AQM)
+      (ATM: non-coupled ATM stand-alone | AQM: ATM+AQM)
   --platform=PLATFORM
       name of machine you are building on
       (e.g. hera | orion | wcoss_dell_p3)
