@@ -135,10 +135,6 @@ if [ "${build_app_add_aqm}" = "YES" ]; then
   ## GEFS2CLBC
   echo "... Build gefs2clbc-para ..."
   ./build_gefs2clbc.sh || exit 2
-
-  ## Replace UPP control file
-  echo "... Replace UPP control file ..."
-  cp "${SRC_DIR}/AQM-utils/parm/postxconfig-NT-fv3lam_cmaq.txt" "${SRC_DIR}/UPP/parm/" || exit 3
 fi
 
 echo "===== App installed successfully !!! ====="
