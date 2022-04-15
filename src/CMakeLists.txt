@@ -9,7 +9,11 @@ ExternalProject_Add(UFS_UTILS
   )
 
 if(NOT CCPP_SUITES)
-  set(CCPP_SUITES "FV3_CPT_v0,FV3_GFS_2017_gfdlmp,FV3_GFS_2017_gfdlmp_regional,FV3_GFS_v15p2,FV3_GFS_v16,FV3_RRFS_v1beta,FV3_HRRR,FV3_RRFS_v1alpha,FV3_GFS_v15_thompson_mynn_lam3km")
+  if(CPL_AQM)
+    set(CCPP_SUITES "FV3_GFS_v15p2,FV3_GFS_v16")
+  else()
+    set(CCPP_SUITES "FV3_GFS_2017_gfdlmp,FV3_GFS_2017_gfdlmp_regional,FV3_GFS_v15p2,FV3_GFS_v16,FV3_RRFS_v1beta,FV3_HRRR,FV3_RRFS_v1alpha,FV3_GFS_v15_thompson_mynn_lam3km")
+  endif()
 endif()
 
 if(NOT APP)
@@ -70,12 +74,20 @@ ExternalProject_Add(UPP
   BUILD_ALWAYS TRUE
   )
 
-#if(CPL_AQM)
-#  ExternalProject_Add(arl_nexus
-#    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/arl_nexus
-#    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/arl_nexus
-#    INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
-#    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
-#    BUILD_ALWAYS TRUE
-#  )
-#endif()
+if(CPL_AQM)
+  ExternalProject_Add(arl_nexus
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/arl_nexus
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/arl_nexus
+    INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
+    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+    BUILD_ALWAYS TRUE
+  )
+
+  ExternalProject_Add(AQM-utils
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/AQM-utils
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/AQM-utils
+    INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
+    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+    BUILD_ALWAYS TRUE
+  )
+endif()
