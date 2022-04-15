@@ -102,7 +102,7 @@ fi
 echo "External checkout  :" ${EXTERNALS}
 
 
-###########
+##########
 set -eu
 ##########
 
@@ -199,11 +199,6 @@ echo "... Compile executables ..."
 make -j8 2>&1 | tee log.make.app
 echo "... App build completed ..."
 
-## Replace UPP control file for AQM =======================================
-if [ "${APPLICATION}" = "AQM" ]; then
-  echo "... Replace UPP control file ..."
-  cp "${SRC_DIR}/AQM-utils/parm/postxconfig-NT-fv3lam_cmaq.txt" "${SRC_DIR}/UPP/parm/" || exit 1
-fi
 
 cd ${SRW_APP_DIR}
 
