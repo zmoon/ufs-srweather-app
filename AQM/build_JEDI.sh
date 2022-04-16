@@ -12,6 +12,7 @@ SRW_APP_DIR="${MYDIR}/.."
 SRC_DIR="${SRW_APP_DIR}/src/JEDI"
 BUILD_DIR="${SRW_APP_DIR}/build/JEDI"
 BIN_DIR="${SRW_APP_DIR}/bin/"
+AQM_DIR="${SRW_APP_DIR}/AQM"
 
 cp -r ${SRC_DIR} ${BUILD_DIR}
 mkdir -p ${BIN_DIR}
