@@ -10,7 +10,7 @@
 ##       or ./build_srw_app.sh --app=ATM                                 ##
 ##                                                                       ##
 ##  2. Coupled regional air quality modeling (RRFS-CMAQ=ATM+AQM):        ##
-##          ./build_srw_app.sh --app=AQM                                 ##
+##          ./build_srw_app.sh --app=AQM  --da=YES                       ##
 ##                                                                       ##
 ###########################################################################
 
@@ -34,6 +34,8 @@ OPTIONS
       CCCP suites to include in build; delimited with ','
   --extrn=EXTERNALS
       Check out external components (YES or NO)
+  --da=DA
+      build DA components: GSI and JEDI (YES or NO)
 EOF_USAGE
 }
 
@@ -56,6 +58,7 @@ PLATFORM="hera"
 COMPILER="intel"
 CCPP_SUITES=""
 EXTERNALS="YES"
+DA="NO"
 
 ## Update of optional arguments ===========================================
 while :; do
@@ -71,6 +74,8 @@ while :; do
     --ccpp|--ccpp=) usage_error "$1 requires argument." ;;
     --extrn=?*) EXTERNALS=${1#*=} ;;
     --extrn|--extrn=) usage_error "$1 requires argument." ;;
+    --da=?*) DA=${1#*=} ;;
+    --da|--da=) usage_error "$1 requires argument." ;;
     -?*|?*) usage_error "Unknown option $1" ;;
     *) break
   esac
@@ -82,6 +87,7 @@ APPLICATION="${APPLICATION^^}"
 PLATFORM="${PLATFORM,,}"
 COMPILER="${COMPILER,,}"
 EXTERNALS="${EXTERNALS^^}"
+DA="${DA^^}"
 
 ## Ensure platform name from variance =====================================
 if [[ "${PLATFORM}" == "wcoss_dell" || "${PLATFORM}" == "wcoss1" ||
@@ -100,6 +106,7 @@ else
   echo "CCPP_SUITES        : Default in src/CMakeLists.txt"
 fi
 echo "External checkout  :" ${EXTERNALS}
+echo "DA components      :" ${DA}
 
 
 ##########
@@ -150,6 +157,27 @@ declare -a exec_srw=( chgres_cube \
 declare -a exec_aqm=( nexus \
                       gefs2lbc_para )
 
+## Additional executables for DA ==========================================
+declare -a exec_da=( gsi.x \
+                     fv3jedi_addincrement.x \
+                     fv3jedi_adjointforecast.x \
+                     fv3jedi_convertincrement.x \
+                     fv3jedi_convertstate.x \
+                     fv3jedi_data_checker.x \
+                     fv3jedi_diffstates.x \
+                     fv3jedi_dirac.x \
+                     fv3jedi_eda.x \
+                     fv3jedi_enshofx.x \
+                     fv3jedi_ensvariance.x \
+                     fv3jedi_error_covariance_training.x \
+                     fv3jedi_forecast.x \
+                     fv3jedi_hofx.x \
+                     fv3jedi_hofx_nomodel.x \
+                     fv3jedi_letkf.x \
+                     fv3jedi_plot_field.x \
+                     fv3jedi_testdata_downloader.py \
+                     fv3jedi_var.x )
+
 ## Remove build-related directories when EXTERNALS=YES ====================
 if [ "${EXTERNALS}" = "YES" ]; then
   rm -rf ${BIN_DIR}
@@ -166,7 +194,11 @@ if [ "${EXTERNALS}" = "YES" ]; then
   if [ "${APPLICATION}" = "ATM" ]; then
     ./manage_externals/checkout_externals
   elif [ "${APPLICATION}" = "AQM" ]; then
-    ./manage_externals/checkout_externals -e ${AQM_DIR}/Externals.cfg
+    if [ "${DA}" = "YES" ]; then
+      ./manage_externals/checkout_externals -e ${AQM_DIR}/Externals_DA.cfg
+    else
+      ./manage_externals/checkout_externals -e ${AQM_DIR}/Externals.cfg
+    fi
   else
     echo "Fatal Error: application is not on the list."
     exit 1
@@ -199,6 +231,15 @@ echo "... Compile executables ..."
 make -j8 2>&1 | tee log.make.app
 echo "... App build completed ..."
 
+## Build DA components: GSI and JEDI ======================================
+if [ "${DA}" = "YES" ]; then
+  echo "... Building GSI ..."
+  cd ${AQM_DIR}
+  ./build_GSI.sh
+  echo "... Building JEDI ..."
+  ./build_JEDI.sh
+fi
+
 
 cd ${SRW_APP_DIR}
 
@@ -221,6 +262,17 @@ for file in "${exec_srw[@]}" ; do
 done
 if [ "${APPLICATION}" = "AQM" ]; then
   for file in "${exec_aqm[@]}" ; do
+    exec_file="${BIN_DIR}/${file}"
+    if [ -f ${exec_file} ]; then
+      echo "PASS:: executable = ${file}" >> ${BUILD_OUT_FN}
+    else
+      echo "FAIL:: executable = ${file}" >> ${BUILD_OUT_FN}
+      (( n_fail=n_fail+1 ))
+    fi
+  done
+fi
+if [ "${DA}" = "YES" ]; then
+  for file in "${exec_da[@]}" ; do
     exec_file="${BIN_DIR}/${file}"
     if [ -f ${exec_file} ]; then
       echo "PASS:: executable = ${file}" >> ${BUILD_OUT_FN}
