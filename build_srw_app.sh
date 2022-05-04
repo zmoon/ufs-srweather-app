@@ -82,6 +82,7 @@ APPLICATION="${APPLICATION^^}"
 PLATFORM="${PLATFORM,,}"
 COMPILER="${COMPILER,,}"
 EXTERNALS="${EXTERNALS^^}"
+MACHINE="${PLATFORM}"
 
 ## Ensure platform name from variance =====================================
 if [[ "${PLATFORM}" == "wcoss_dell" || "${PLATFORM}" == "wcoss1" ||
