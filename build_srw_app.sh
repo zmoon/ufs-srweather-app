@@ -116,8 +116,9 @@ SRW_APP_DIR="${MYDIR}"
 AQM_DIR="${SRW_APP_DIR}/AQM"
 BUILD_DIR="${SRW_APP_DIR}/build"
 BIN_DIR="${SRW_APP_DIR}/bin"
+ETC_DIR="${SRW_APP_DIR}/etc"
 LIB_DIR="${SRW_APP_DIR}/lib"
-MOD_DIR="${SRW_APP_DIR}/env"
+MOD_DIR="${SRW_APP_DIR}/modulefiles"
 SRC_DIR="${SRW_APP_DIR}/src"
 
 ## Output file name to check executables in BIN_DIR =======================
@@ -187,10 +188,12 @@ mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
 
 ## Build UFS SRW App ======================================================
+echo "... Activate Lmod for some systems ..."
+source "${ETC_DIR}/lmod-setup.sh"
 echo "... Load environment file ..."
-MOD_FILE="${MOD_DIR}/build_${PLATFORM}_${COMPILER}.env"
+MOD_FILE="${MOD_DIR}/build_${PLATFORM}_${COMPILER}"
 module use ${MOD_DIR}
-. ${MOD_FILE}
+module load ${MOD_FILE}
 module list
 
 echo "... Generate CMAKE configuration ..."
