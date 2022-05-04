@@ -206,11 +206,11 @@ echo "... App build completed ..."
 
 cd ${SRW_APP_DIR}
 
+echo "... Checking executables in bin ..."
 ## Create output file to check if executables exist in BIN_DIR ============
 if [ ! -f "${BUILD_OUT_FN}" ]; then
    touch ${BUILD_OUT_FN}
 fi
-
 ## Check if all executables exist in BIN_DIR ==============================
 n_fail=0
 echo $( date --utc ) >> ${BUILD_OUT_FN}
@@ -234,6 +234,8 @@ if [ "${APPLICATION}" = "AQM" ]; then
     fi
   done
 fi
+
+echo "... Check the build result file: ${BUILD_OUT_FN} ..."
 
 if [ ${n_fail} -eq 0 ]; then
   echo "===== App-build: COMPLETED !!! ====="
