@@ -192,7 +192,7 @@ cd ${BUILD_DIR}
 echo "... Activate Lmod for some systems ..."
 source "${ETC_DIR}/lmod-setup.sh"
 echo "... Load environment file ..."
-MOD_FILE="${MOD_DIR}/build_${PLATFORM}_${COMPILER}"
+MOD_FILE="build_${PLATFORM}_${COMPILER}"
 module use ${MOD_DIR}
 module load ${MOD_FILE}
 module list
