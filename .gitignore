@@ -1,0 +1,10 @@
+/bin
+/build
+/include
+/lib
+/share
+
+/regional_workflow
+
+/src
+!/src/CMakeLists.txt
