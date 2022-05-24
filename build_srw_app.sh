@@ -85,10 +85,9 @@ EXTERNALS="${EXTERNALS^^}"
 MACHINE="${PLATFORM}"
 
 ## Ensure platform name from variance =====================================
-if [[ "${PLATFORM}" == "wcoss_dell" || "${PLATFORM}" == "wcoss1" ||
-      "${PLATFORM}" == "venus" || "${PLATFORM}" = "mars" ||
-      "${PLATFORM}" == "wcoss_dell_p35" ]]; then
-  PLATFORM="wcoss_dell_p3"
+if [[ "${PLATFORM}" == "wcoss2" || "${PLATFORM}" == "cactus" ||
+      "${PLATFORM}" == "dogwood" ]]; then
+  PLATFORM="wcoss2"
 fi
 
 ## Print out parameter values =============================================
@@ -168,7 +167,11 @@ if [ "${EXTERNALS}" = "YES" ]; then
   if [ "${APPLICATION}" = "ATM" ]; then
     ./manage_externals/checkout_externals
   elif [ "${APPLICATION}" = "AQM" ]; then
-    ./manage_externals/checkout_externals -e ${AQM_DIR}/Externals.cfg
+    ./manage_externals/checkout_externals
+    echo "... Replace regional workflow with the one for RRFS-CMAQ ..."
+    rm -rf regional_workflow
+    echo "... Checking out additional external components for RRFS-CMAQ ..."
+    ./manage_externals/checkout_externals -e externals/Externals_AQM.cfg
   else
     echo "Fatal Error: application is not on the list."
     exit 1
