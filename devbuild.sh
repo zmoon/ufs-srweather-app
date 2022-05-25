@@ -20,7 +20,7 @@ OPTIONS
   -e, --extrn=EXTERNALS
       check out external components (YES | NO)
   --ccpp="CCPP_SUITE1,CCPP_SUITE2..."
-      CCCP_SUITES to include in build; delimited with ','
+      CCPP suites (CCCP_SUITES) to include in build; delimited with ','
   --enable-options="OPTION1,OPTION2,..."
       enable ufs-weather-model options; delimited with ','
       (e.g. 32BIT | INLINE_POST | UFS_GOCART | MOM6 | CICE6 | WW3 | CMEPS)
@@ -61,7 +61,7 @@ Settings:
   PLATFORM=${PLATFORM}
   COMPILER=${COMPILER}
   APP=${APPLICATION}
-  CCPP_SUITES=${CCPP_SUITES}
+  CCPP=${CCPP_SUITES}
   EXTRN=${EXTERNALS}
   ENABLE_OPTIONS=${ENABLE_OPTIONS}
   DISABLE_OPTIONS=${DISABLE_OPTIONS}
