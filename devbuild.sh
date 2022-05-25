@@ -14,11 +14,13 @@ OPTIONS
   -c, --compiler=COMPILER
       compiler to use; default depends on platform
       (e.g. intel | gnu | cray | gccgfortran)
-  --app=APPLICATION
-      weather model application to build
-      (e.g. ATM | ATMW | S2S | S2SW)
+  -a, --app=APPLICATION
+      weather model application to build; for example, ATMAQ for RRFS-CMAQ
+      (e.g. ATM | ATMAQ | ATMW | S2S | S2SW)
+  -e, --extrn=EXTERNALS
+      check out external components (YES | NO)
   --ccpp="CCPP_SUITE1,CCPP_SUITE2..."
-      CCCP suites to include in build; delimited with ','
+      CCCP_SUITES to include in build; delimited with ','
   --enable-options="OPTION1,OPTION2,..."
       enable ufs-weather-model options; delimited with ','
       (e.g. 32BIT | INLINE_POST | UFS_GOCART | MOM6 | CICE6 | WW3 | CMEPS)
@@ -52,13 +54,15 @@ settings () {
 cat << EOF_SETTINGS
 Settings:
 
-  SRC_DIR=${SRC_DIR}
+  SRW_DIR=${SRW_DIR}
+  BIN_DIR=${BIN_DIR}
   BUILD_DIR=${BUILD_DIR}
   INSTALL_DIR=${INSTALL_DIR}
   PLATFORM=${PLATFORM}
   COMPILER=${COMPILER}
   APP=${APPLICATION}
-  CCPP=${CCPP}
+  CCPP_SUITES=${CCPP_SUITES}
+  EXTRN=${EXTRN}
   ENABLE_OPTIONS=${ENABLE_OPTIONS}
   DISABLE_OPTIONS=${DISABLE_OPTIONS}
   CLEAN=${CLEAN}
@@ -79,13 +83,15 @@ usage_error () {
 
 # default settings
 LCL_PID=$$
-SRC_DIR=$(cd "$(dirname "$(readlink -f -n "${BASH_SOURCE[0]}" )" )" && pwd -P)
+SRW_DIR=$(cd "$(dirname "$(readlink -f -n "${BASH_SOURCE[0]}" )" )" && pwd -P)
+BIN_DIR="${SRW_DIR}/bin"
 MACHINE_SETUP=${SRC_DIR}/src/UFS_UTILS/sorc/machine-setup.sh
-BUILD_DIR=${SRC_DIR}/build
-INSTALL_DIR=${SRC_DIR}
+BUILD_DIR="${SRW_DIR}/build"
+INSTALL_DIR=${SRW_DIR}
 COMPILER=""
 APPLICATION=""
-CCPP=""
+EXTRN="NO"
+CCPP_SUITES=""
 ENABLE_OPTIONS=""
 DISABLE_OPTIONS=""
 BUILD_TYPE="RELEASE"
@@ -108,9 +114,11 @@ while :; do
     --platform|--platform=|-p|-p=) usage_error "$1 requires argument." ;;
     --compiler=?*|-c=?*) COMPILER=${1#*=} ;;
     --compiler|--compiler=|-c|-c=) usage_error "$1 requires argument." ;;
-    --app=?*) APPLICATION=${1#*=} ;;
-    --app|--app=) usage_error "$1 requires argument." ;;
-    --ccpp=?*) CCPP=${1#*=} ;;
+    --app=?*|-a=?*) APPLICATION=${1#*=} ;;
+    --app|--app=|-a|-a=) usage_error "$1 requires argument." ;;
+    --extrn=?*|-e=?*) EXTERNALS=${1#*=} ;;
+    --extrn|--extrn=|-e|-e=) usage_error "$1 requires argument." ;;
+    --ccpp=?*) CCPP_SUITES=${1#*=} ;;
     --ccpp|--ccpp=) usage_error "$1 requires argument." ;;
     --enable-options=?*) ENABLE_OPTIONS=${1#*=} ;;
     --enable-options|--enable-options=) usage_error "$1 requires argument." ;;
@@ -135,6 +143,18 @@ while :; do
   esac
   shift
 done
+
+# Ensure uppercase / lowercase ============================================
+APPLICATION="${APPLICATION^^}"
+PLATFORM="${PLATFORM,,}"
+COMPILER="${COMPILER,,}"
+EXTERNALS="${EXTERNALS^^}"
+
+# Ensure platform name from variance ======================================
+if [[ "${PLATFORM}" == "wcoss2" || "${PLATFORM}" == "cactus" ||
+      "${PLATFORM}" == "dogwood" ]]; then
+  PLATFORM="wcoss2"
+fi
 
 # check if PLATFORM is set
 if [ -z $PLATFORM ] ; then
@@ -172,9 +192,26 @@ if [ "${VERBOSE}" = true ] ; then
   settings
 fi
 
+# Check out external components ===========================================
+if [ "${EXTERNALS}" = "YES" ]; then
+  printf "... Checking out the external components ...\n"
+  if [ -z "${APPLICATION}" ]; then
+    ./manage_externals/checkout_externals
+  elif [ "${APPLICATION}" = "ATMAQ" ]; then
+    ./manage_externals/checkout_externals
+    printf "... Replace regional workflow with the one for RRFS-CMAQ ...\n"
+    rm -rf regional_workflow
+    printf "... Checking out additional external components for RRFS-CMAQ ...\n"
+    ./manage_externals/checkout_externals -e externals/Externals_AQM.cfg
+  else
+    printf "Fatal Error: application is not on the list.\n" >&2
+    exit 64
+  fi
+fi
+
 # set MODULE_FILE for this platform/compiler combination
 MODULE_FILE="build_${PLATFORM}_${COMPILER}"
-if [ ! -f "${SRC_DIR}/modulefiles/${MODULE_FILE}" ]; then
+if [ ! -f "${SRW_DIR}/modulefiles/${MODULE_FILE}" ]; then
   printf "ERROR: module file does not exist for platform/compiler\n" >&2
   printf "  MODULE_FILE=${MODULE_FILE}\n" >&2
   printf "  PLATFORM=${PLATFORM}\n" >&2
@@ -226,14 +263,17 @@ CMAKE_SETTINGS="${CMAKE_SETTINGS} -DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 if [ ! -z "${APPLICATION}" ]; then
   CMAKE_SETTINGS="${CMAKE_SETTINGS} -DAPP=${APPLICATION}"
 fi
-if [ ! -z "${CCPP}" ]; then
-  CMAKE_SETTINGS="${CMAKE_SETTINGS} -DCCPP=${CCPP}"
+if [ ! -z "${CCPP_SUITES}" ]; then
+  CMAKE_SETTINGS="${CMAKE_SETTINGS} -DCCPP_SUITES=${CCPP_SUITES}"
 fi
 if [ ! -z "${ENABLE_OPTIONS}" ]; then
   CMAKE_SETTINGS="${CMAKE_SETTINGS} -DENABLE_OPTIONS=${ENABLE_OPTIONS}"
 fi
 if [ ! -z "${DISABLE_OPTIONS}" ]; then
   CMAKE_SETTINGS="${CMAKE_SETTINGS} -DDISABLE_OPTIONS=${DISABLE_OPTIONS}"
+fi
+if [ "${APPLICATION}" = "ATMAQ" ]; then
+  CMAKE_SETTINGS="${CMAKE_SETTINGS} -DCPL_AQM=ON"
 fi
 
 # make settings
@@ -243,18 +283,92 @@ if [ "${VERBOSE}" = true ]; then
 fi
 
 # Before we go on load modules, we first need to activate Lmod for some systems
-source ${SRC_DIR}/etc/lmod-setup.sh
+source ${SRW_DIR}/etc/lmod-setup.sh
 
 # source the module file for this platform/compiler combination, then build the code
 printf "... Load MODULE_FILE and create BUILD directory ...\n"
-module use ${SRC_DIR}/modulefiles
+module use ${SRW_DIR}/modulefiles
 module load ${MODULE_FILE}
 module list
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
 printf "... Generate CMAKE configuration ...\n"
-cmake ${SRC_DIR} ${CMAKE_SETTINGS} 2>&1 | tee log.cmake
+cmake ${SRW_DIR} ${CMAKE_SETTINGS} 2>&1 | tee log.cmake
 printf "... Compile executables ...\n"
 make ${MAKE_SETTINGS} 2>&1 | tee log.make
+
+
+## Checking executables in BIN_DIR ========================================
+
+# Output file name to check executables ===================================
+BUILD_OUT_FN="build_exec_pass.out"
+
+### List of Excutables ### ================================================
+# Basic executables of the UFS SRW App ====================================
+declare -a exec_srw=( chgres_cube \
+                      emcsfc_ice_blend \
+                      emcsfc_snow2mdl \
+                      filter_topo \
+                      fregrid \
+                      fvcom_to_FV3 \
+                      global_cycle \
+                      global_equiv_resol \
+                      inland \
+                      lakefrac \
+                      make_hgrid \
+                      make_solo_mosaic \
+                      orog \
+                      orog_gsl \
+                      regional_esg_grid \
+                      sfc_climo_gen \
+                      shave \
+                      ufs_model \
+                      upp.x \
+                      vcoord_gen )
+## Additional executables for ATMAQ =======================================
+declare -a exec_aqm=( nexus \
+                      gefs2lbc_para )
+### List end ### ==========================================================
+
+cd ${SRW_DIR}
+
+printf "... Checking executables in bin ...\n"
+# Create output file to check if executables exist in BIN_DIR =============
+if [ ! -f "${BUILD_OUT_FN}" ]; then
+   touch ${BUILD_OUT_FN}
+fi
+# Check if all executables exist in BIN_DIR ===============================
+n_fail=0
+echo $( date --utc ) >> ${BUILD_OUT_FN}
+for file in "${exec_srw[@]}" ; do
+  exec_file="${BIN_DIR}/${file}"
+  if [ -f ${exec_file} ]; then
+    echo "PASS:: executable = ${file}" >> ${BUILD_OUT_FN}
+  else
+    echo "FAIL:: executable = ${file}" >> ${BUILD_OUT_FN}
+    (( n_fail=n_fail+1 ))
+  fi
+done
+if [ "${APPLICATION}" = "ATMAQ" ]; then
+  for file in "${exec_aqm[@]}" ; do
+    exec_file="${BIN_DIR}/${file}"
+    if [ -f ${exec_file} ]; then
+      echo "PASS:: executable = ${file}" >> ${BUILD_OUT_FN}
+    else
+      echo "FAIL:: executable = ${file}" >> ${BUILD_OUT_FN}
+      (( n_fail=n_fail+1 ))
+    fi
+  done
+fi
+
+echo "... Check the build result file: ${BUILD_OUT_FN} ..."
+if [ ${n_fail} -eq 0 ]; then
+  echo "===== App-build: COMPLETED !!! ====="
+else
+  echo "===== App-build: FAILED !!! ====="
+  echo "===== Number of failed executables:" ${n_fail}
+  echo "===== Please check:" ${BUILD_OUT_FN}
+fi
+
 
 exit 0
