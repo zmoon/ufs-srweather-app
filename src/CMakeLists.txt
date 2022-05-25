@@ -31,18 +31,18 @@ list(APPEND UFS_WEATHER_MODEL_ARGS
 )
 
 string(TOUPPER "${CMAKE_BUILD_TYPE}" TOUPPER_CMAKE_BUILD_TYPE)
-if(TOUPPER_CMAKE_BUILD_TYPE MATCHES "DEBUG")
+if (TOUPPER_CMAKE_BUILD_TYPE MATCHES "DEBUG")
   list(APPEND UFS_WEATHER_MODEL_ARGS "-DDEBUG=ON")
 endif()
 
-if(ENABLE_OPTIONS)
+if (ENABLE_OPTIONS)
   string(REPLACE "," ";" ENABLE_OPTIONS "${ENABLE_OPTIONS}")
   foreach (option_on IN ITEMS ${ENABLE_OPTIONS})
     list(APPEND UFS_WEATHER_MODEL_ARGS "-D${option_on}=ON")
   endforeach()
 endif()
 
-if(DISABLE_OPTIONS)
+if (DISABLE_OPTIONS)
   string(REPLACE "," ";" DISABLE_OPTIONS "${DISABLE_OPTIONS}")
   foreach (option_off IN ITEMS ${DISABLE_OPTIONS})
     list(APPEND UFS_WEATHER_MODEL_ARGS "-D${option_off}=OFF")
@@ -76,7 +76,7 @@ ExternalProject_Add(UPP
   BUILD_ALWAYS TRUE
   )
 
-if(CPL_AQM)
+if (CPL_AQM)
   ExternalProject_Add(arl_nexus
     DEPENDS ufs-weather-model
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/arl_nexus
