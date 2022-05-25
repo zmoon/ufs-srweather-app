@@ -85,7 +85,7 @@ usage_error () {
 LCL_PID=$$
 SRW_DIR=$(cd "$(dirname "$(readlink -f -n "${BASH_SOURCE[0]}" )" )" && pwd -P)
 BIN_DIR="${SRW_DIR}/bin"
-MACHINE_SETUP=${SRC_DIR}/src/UFS_UTILS/sorc/machine-setup.sh
+MACHINE_SETUP=${SRW_DIR}/src/UFS_UTILS/sorc/machine-setup.sh
 BUILD_DIR="${SRW_DIR}/build"
 INSTALL_DIR=${SRW_DIR}
 COMPILER=""
