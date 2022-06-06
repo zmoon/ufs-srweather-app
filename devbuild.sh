@@ -61,8 +61,8 @@ Settings:
   PLATFORM=${PLATFORM}
   COMPILER=${COMPILER}
   APP=${APPLICATION}
-  CCPP=${CCPP_SUITES}
   EXTRN=${EXTERNALS}
+  CCPP=${CCPP_SUITES}
   ENABLE_OPTIONS=${ENABLE_OPTIONS}
   DISABLE_OPTIONS=${DISABLE_OPTIONS}
   CLEAN=${CLEAN}
@@ -189,17 +189,12 @@ fi
 # Check out external components ===========================================
 if [ "${EXTERNALS}" = "YES" ]; then
   printf "... Checking out the external components ...\n"
-  if [ -z "${APPLICATION}" ]; then
-    ./manage_externals/checkout_externals
-  elif [ "${APPLICATION}" = "ATMAQ" ]; then
-    ./manage_externals/checkout_externals
+  ./manage_externals/checkout_externals
+  if [ "${APPLICATION}" = "ATMAQ" ]; then
     printf "... Replace regional workflow with the one for RRFS-CMAQ ...\n"
     rm -rf regional_workflow
     printf "... Checking out additional external components for RRFS-CMAQ ...\n"
     ./manage_externals/checkout_externals -e externals/Externals_AQM.cfg
-  else
-    printf "Fatal Error: application is not on the list.\n" >&2
-    exit 64
   fi
 fi
 
