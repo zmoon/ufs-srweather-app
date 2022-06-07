@@ -1,0 +1,17 @@
+bin/
+build/
+include/
+lib/
+regional_workflow/
+share/
+src*/
+
+*.[aox]
+*.mod
+*.so
+*.exe
+*.x
+
+*.swp
+*.o
+*.out
