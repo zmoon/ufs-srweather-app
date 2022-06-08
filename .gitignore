@@ -10,8 +10,6 @@ src*/
 *.mod
 *.so
 *.exe
-*.x
 
 *.swp
-*.o
 *.out
