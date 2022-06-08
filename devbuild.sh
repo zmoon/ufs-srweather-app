@@ -188,13 +188,21 @@ fi
 
 # Check out external components ===========================================
 if [ "${EXTERNALS}" = "YES" ]; then
-  printf "... Checking out the external components ...\n"
-  ./manage_externals/checkout_externals
+  if [ -d "${SRW_DIR}/regional_workflow" ]; then
+    printf "External components already exist. This step will be skipped.\n"
+  else  
+    printf "... Checking out the external components ...\n"
+    ./manage_externals/checkout_externals
+  fi
   if [ "${APPLICATION}" = "ATMAQ" ]; then
     printf "... Replace regional workflow with the one for RRFS-CMAQ ...\n"
     rm -rf regional_workflow
-    printf "... Checking out additional external components for RRFS-CMAQ ...\n"
-    ./manage_externals/checkout_externals -e externals/Externals_AQM.cfg
+    if [ -d "${SRW_DIR}/arl_nexus" ]; then
+      printf "Extra external components already exist. This step will be skipped.\n"
+    else  
+      printf "... Checking out extra external components for RRFS-CMAQ ...\n"
+      ./manage_externals/checkout_externals -e externals/Externals_AQM.cfg
+    fi
   fi
 fi
 
