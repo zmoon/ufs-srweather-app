@@ -2,7 +2,7 @@
 
 proc ModulesHelp { } {
    puts stderr "This module loads libraries for building SRW on"
-   puts stderr "the NOAA RDHPC machine Hera using Intel-18.0.5.274"
+   puts stderr "the NOAA RDHPC machine Hera using Intel-2022.1.2"
 }
 
 module-whatis "Loads libraries needed for building SRW on Hera"

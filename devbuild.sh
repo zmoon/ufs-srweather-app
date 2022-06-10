@@ -10,7 +10,7 @@ OPTIONS
       show this help guide
   -p, --platform=PLATFORM
       name of machine you are building on
-      (e.g. cheyenne | hera | jet | orion | wcoss_dell_p3)
+      (e.g. cheyenne | hera | jet | orion | wcoss_dell_p3 | wcoss2)
   -c, --compiler=COMPILER
       compiler to use; default depends on platform
       (e.g. intel | gnu | cray | gccgfortran)
@@ -169,9 +169,10 @@ if [ -z "${COMPILER}" ] ; then
     jet|hera|gaea) COMPILER=intel ;;
     orion) COMPILER=intel ;;
     wcoss_dell_p3) COMPILER=intel ;;
+    wcoss2) COMPILER=intel ;;
     cheyenne) COMPILER=intel ;;
     macos,singularity) COMPILER=gnu ;;
-    odin) COMPILER=intel ;;
+    odin,noaacloud) COMPILER=intel ;;
     *)
       COMPILER=intel
       printf "WARNING: Setting default COMPILER=intel for new platform ${PLATFORM}\n" >&2;
@@ -280,7 +281,7 @@ if [ "${VERBOSE}" = true ]; then
 fi
 
 # Before we go on load modules, we first need to activate Lmod for some systems
-source ${SRW_DIR}/etc/lmod-setup.sh
+source ${SRW_DIR}/etc/lmod-setup.sh $MACHINE
 
 # source the module file for this platform/compiler combination, then build the code
 printf "... Load MODULE_FILE and create BUILD directory ...\n"
