@@ -4,11 +4,7 @@ include/
 lib/
 regional_workflow/
 share/
-src/AQM-utils/ 
-src/UFS_UTILS/  
-src/UPP/  
-src/arl_nexus/  
-src/ufs-weather-model/
+src/*/ 
 
 *.[aox]
 *.mod
