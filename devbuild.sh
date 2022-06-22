@@ -366,7 +366,7 @@ for file in "${exec_srw[@]}" ; do
   fi
 done
 
-if [ ! -z "${RRFS}" ]; then
+if [ "${RRFS}" = "on" ]; then
   for file in "${exec_rrfs[@]}" ; do
     exec_file="${BIN_DIR}/${file}"
     if [ -f ${exec_file} ]; then
