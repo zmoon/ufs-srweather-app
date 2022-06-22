@@ -318,6 +318,30 @@ declare -a exec_srw=( chgres_cube \
                       upp.x \
                       vcoord_gen )
 ## Additional executables for ATMAQ =======================================
+declare -a exec_rrfs=( enkf.x \
+                       gsi.x \
+                       nc_diag_cat.x \
+                       ncdiag_cat_serial.x \
+                       test_nc_unlimdims.x \
+                       adjust_soiltq.exe \
+                       check_imssnow_fv3lam.exe \
+                       fv3lam_nonvarcldana.exe \
+                       gen_annual_maxmin_GVF.exe \
+                       gen_cs.exe \
+                       gen_ensmean_recenter.exe \
+                       lakesurgery.exe \
+                       process_imssnow_fv3lam.exe \
+                       process_larccld.exe \
+                       process_Lightning.exe \
+                       process_metarcld.exe \
+                       process_NSSL_mosaic.exe \
+                       process_updatesst.exe \
+                       ref2tten.exe \
+                       update_bc.exe \
+                       update_GVF.exe \
+                       update_ice.exe \
+                       use_raphrrr_sfc.exe )
+## Additional executables for ATMAQ =======================================
 declare -a exec_aqm=( nexus \
                       gefs2lbc_para )
 ### List end ### ==========================================================
@@ -341,6 +365,19 @@ for file in "${exec_srw[@]}" ; do
     (( n_fail=n_fail+1 ))
   fi
 done
+
+if [ ! -z "${RRFS}" ]; then
+  for file in "${exec_rrfs[@]}" ; do
+    exec_file="${BIN_DIR}/${file}"
+    if [ -f ${exec_file} ]; then
+      echo "PASS:: executable = ${file}" >> ${BUILD_OUT_FN}
+    else
+      echo "FAIL:: executable = ${file}" >> ${BUILD_OUT_FN}
+      (( n_fail=n_fail+1 ))
+    fi
+  done
+fi
+
 if [ "${APPLICATION}" = "ATMAQ" ]; then
   for file in "${exec_aqm[@]}" ; do
     exec_file="${BIN_DIR}/${file}"
