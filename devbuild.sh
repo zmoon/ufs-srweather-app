@@ -17,8 +17,6 @@ OPTIONS
   -a, --app=APPLICATION
       weather model application to build; for example, ATMAQ for RRFS-CMAQ
       (e.g. ATM | ATMAQ | ATMW | S2S | S2SW)
-  -e, --extrn=EXTERNALS
-      check out external components (YES | NO)
   --ccpp="CCPP_SUITE1,CCPP_SUITE2..."
       CCPP suites (CCPP_SUITES) to include in build; delimited with ','
   --rrfs
@@ -63,7 +61,6 @@ Settings:
   PLATFORM=${PLATFORM}
   COMPILER=${COMPILER}
   APP=${APPLICATION}
-  EXTRN=${EXTERNALS}
   CCPP=${CCPP_SUITES}
   ENABLE_OPTIONS=${ENABLE_OPTIONS}
   DISABLE_OPTIONS=${DISABLE_OPTIONS}
@@ -92,7 +89,6 @@ BUILD_DIR="${SRW_DIR}/build"
 INSTALL_DIR=${SRW_DIR}
 COMPILER=""
 APPLICATION=""
-EXTERNALS="NO"
 CCPP_SUITES=""
 RRFS="off"
 ENABLE_OPTIONS=""
@@ -119,8 +115,6 @@ while :; do
     --compiler|--compiler=|-c|-c=) usage_error "$1 requires argument." ;;
     --app=?*|-a=?*) APPLICATION=${1#*=} ;;
     --app|--app=|-a|-a=) usage_error "$1 requires argument." ;;
-    --extrn=?*|-e=?*) EXTERNALS=${1#*=} ;;
-    --extrn|--extrn=|-e|-e=) usage_error "$1 requires argument." ;;
     --ccpp=?*) CCPP_SUITES=${1#*=} ;;
     --ccpp|--ccpp=) usage_error "$1 requires argument." ;;
     --rrfs) RRFS="on" ;;
@@ -192,23 +186,15 @@ if [ "${VERBOSE}" = true ] ; then
   settings
 fi
 
-# Check out external components ===========================================
-if [ "${EXTERNALS}" = "YES" ]; then
-  if [ -d "${SRW_DIR}/regional_workflow" ]; then
-    printf "External components already exist. This step will be skipped.\n"
+# Check out external components for RRFS-CMAQ =============================
+if [ "${APPLICATION}" = "ATMAQ" ]; then
+  if [ -d "${SRW_DIR}/src/arl_nexus" ]; then
+    printf "Extra external components already exist. This step will be skipped.\n"
   else  
-    printf "... Checking out the external components ...\n"
-    ./manage_externals/checkout_externals
-  fi
-  if [ "${APPLICATION}" = "ATMAQ" ]; then
     printf "... Replace regional workflow with the one for RRFS-CMAQ ...\n"
     rm -rf regional_workflow
-    if [ -d "${SRW_DIR}/arl_nexus" ]; then
-      printf "Extra external components already exist. This step will be skipped.\n"
-    else  
-      printf "... Checking out extra external components for RRFS-CMAQ ...\n"
-      ./manage_externals/checkout_externals -e externals/Externals_AQM.cfg
-    fi
+    printf "... Checking out extra external components for RRFS-CMAQ ...\n"
+    ./manage_externals/checkout_externals -e externals/Externals_AQM.cfg
   fi
 fi
 

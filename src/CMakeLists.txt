@@ -83,6 +83,7 @@ ExternalProject_Add(UPP
 
 if (ENABLE_RRFS)
   ExternalProject_Add(GSI
+    DEPENDS ufs-weather-model
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/GSI
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/gsi
     INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
@@ -91,6 +92,7 @@ if (ENABLE_RRFS)
     )
 
   ExternalProject_Add(rrfs_utl
+    DEPENDS ufs-weather-model
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/rrfs_utl
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/rrfs_utl
     INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
